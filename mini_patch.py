@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 # RTX 5090 için minimal patch
 import torch

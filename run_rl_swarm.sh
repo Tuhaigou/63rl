@@ -266,9 +266,9 @@ echo_blue ">> Post about rl-swarm on X/twitter! --> https://tinyurl.com/swarmtwe
 echo_blue ">> And remember to star the repo on GitHub! --> https://github.com/gensyn-ai/rl-swarm"
 
 if [ -n "$ORG_ID" ]; then
-	python /home/taygun/rl-swarm/full_patch.py
-	python /home/taygun/rl-swarm/fix_flash_attn.py
-	python /home/taygun/rl-swarm/fix_flash_attn.py
+	python ./full_patch.py
+	python ./fix_flash_attn.py
+	python ./fix_flash_attn.py
     python -m hivemind_exp.gsm8k.train_single_gpu \
         --hf_token "$HUGGINGFACE_ACCESS_TOKEN" \
         --identity_path "$IDENTITY_PATH" \

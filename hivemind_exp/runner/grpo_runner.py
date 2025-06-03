@@ -146,18 +146,18 @@ class GRPORunner:
         initial_peers = grpo_args.initial_peers
         # dht = hivemind.DHT(start=True, ensure_bootstrap_success=False, startup_timeout=120, **self._dht_kwargs(grpo_args))
         # dht = hivemind.DHT(start=True, startup_timeout=60, ensure_bootstrap_success=False, **self._dht_kwargs(grpo_args))
-		dht_kwargs = self._dht_kwargs(grpo_args)
-		
-		# If no initial peers or all peers are empty strings, allow bootstrap to fail
-		# This handles cases where the coordinator returns empty/invalid peers
-		# Empty list is falsy, so this covers that case too
-		if not initial_peers or all(not peer.strip() for peer in initial_peers if isinstance(peer, str)):
-		    dht_kwargs["ensure_bootstrap_success"] = False
-		    logger.info("No valid initial peers found, starting as potential bootstrap node")
-		
-		dht = hivemind.DHT(start=True, startup_timeout=120, **dht_kwargs)
-		
-		if initial_peers:
+        dht_kwargs = self._dht_kwargs(grpo_args)
+
+        # If no initial peers or all peers are empty strings, allow bootstrap to fail
+        # This handles cases where the coordinator returns empty/invalid peers
+        # Empty list is falsy, so this covers that case too
+        if not initial_peers or all(not peer.strip() for peer in initial_peers if isinstance(peer, str)):
+            dht_kwargs["ensure_bootstrap_success"] = False
+            logger.info("No valid initial peers found, starting as potential bootstrap node")
+
+        dht = hivemind.DHT(start=True, startup_timeout=120, **dht_kwargs)
+
+        if initial_peers:
             logger.info(f"🐝 Joining swarm with initial_peers = {initial_peers}")
         else:
             first_visible = str(dht.get_visible_maddrs()[0])

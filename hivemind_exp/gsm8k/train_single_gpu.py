@@ -23,12 +23,15 @@ torch.backends.cuda.enable_flash_sdp(False)
 # GRPOConfig'i patch'le
 from trl import GRPOConfig
 original_post_init = GRPOConfig.__post_init__
+
+
 def patched_post_init(self):
     # generation_batch_size ve steps_per_generation çakışmasını önle
     if hasattr(self, 'generation_batch_size') and hasattr(self, 'steps_per_generation'):
         if self.generation_batch_size is not None and self.steps_per_generation is not None:
             self.generation_batch_size = None
     original_post_init(self)
+
 
 GRPOConfig.__post_init__ = patched_post_init
 
@@ -74,6 +77,7 @@ def patch_hivemind_trainer():
     except Exception as e:
         print(f"HivemindGRPOTrainer patch uygulanamadı: {e}")
 
+
 # Patch'i uygula
 patch_hivemind_trainer()
 
@@ -95,40 +99,41 @@ def patch_accelerate_dataloader():
     except Exception as e:
         print(f"Failed to patch accelerate: {e}")
 
+
 # main() fonksiyonundan önce çağır
 patch_accelerate_dataloader()
+
 
 def main():
     # Setup logging
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.DEBUG)
-    
+
     # Create and add the TeeHandler
     tee_handler = TeeHandler("logs/swarm.log", mode='w')
     tee_handler.setLevel(logging.DEBUG)
     root_logger.addHandler(tee_handler)
-    
+
     # Log system info and set up print capture
     root_logger.debug(print_system_info())
     sys.stdout = PrintCapture(root_logger)
 
     parser = TrlParser((ModelConfig, GRPOArguments, TestnetGRPOArguments, GRPOConfig))  # type: ignore
     model_args, grpo_args, testnet_args, training_args = parser.parse_args_and_config()
-    # training_args.logging_dir = "logs" 
-	training_args.logging_dir = "logs"
-	
-	# RTX 5090 için vLLM'yi devre dışı bırak
-	training_args.use_vllm = False
-	print("✓ vLLM devre dışı bırakıldı (RTX 5090 uyumluluğu için)")
-	
-	# GRPO config çakışmasını çöz
-	if hasattr(training_args, 'generation_batch_size') and hasattr(training_args, 'steps_per_generation'):
-	    if training_args.generation_batch_size is not None and training_args.steps_per_generation is not None:
-	        training_args.generation_batch_size = None
-	        print("✓ generation_batch_size None yapıldı (GRPO config uyumluluğu için)")
 
+    training_args.logging_dir = "logs"
 
-    # Run main training loop.
+    # RTX 5090 için vLLM'yi devre dışı bırak
+    training_args.use_vllm = False
+    print("✓ vLLM devre dışı bırakıldı (RTX 5090 uyumluluğu için)")
+
+    # GRPO config çakışmasını çöz
+    if hasattr(training_args, 'generation_batch_size') and hasattr(training_args, 'steps_per_generation'):
+        if training_args.generation_batch_size is not None and training_args.steps_per_generation is not None:
+            training_args.generation_batch_size = None
+            print("✓ generation_batch_size None yapıldı (GRPO config uyumluluğu için)")
+
+    # Run main training loop
     contract_address = testnet_args.contract_address
     if org_id := testnet_args.modal_org_id:
         assert contract_address, "Contract address must be set!"

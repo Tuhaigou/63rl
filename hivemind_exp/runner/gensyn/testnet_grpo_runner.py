@@ -6,9 +6,7 @@ from typing import Callable, Tuple
 from datasets import Dataset
 from trl import GRPOConfig, ModelConfig
 
-from hivemind_exp.chain_utils import (
-    SwarmCoordinator,
-)
+from hivemind_exp.chain_utils import SwarmCoordinator
 from hivemind_exp.runner.grpo_runner import GRPOArguments, GRPORunner
 from hivemind_exp.trainer.gensyn.testnet_grpo_trainer import TestnetGRPOTrainer
 
@@ -30,16 +28,16 @@ class TestnetGRPORunner(GRPORunner):
         self.coordinator = coordinator
 
     def get_initial_peers(self) -> list[str]:
-    # Skip chain lookup if no peers provided
+        # Skip chain lookup if no peers provided
         if not getattr(self, 'force_chain_lookup', True):
-				return []
-    # Original chain lookup
+            return []
+        # Original chain lookup
         peers = self.coordinator.get_bootnodes()
         logger.info(f"Bootnodes from chain: {peers}")
-       
-    # Filter out dead peers (optional)
+
+        # Filter out dead peers (optional)
         alive_peers = [p for p in peers if not p.startswith('/ip4/38.101.215.14')]
-        return alive_peers if alive_peers else [] 
+        return alive_peers if alive_peers else []
 
     def register_peer(self, peer_id):
         logger.info(f"Registering self with peer ID: {peer_id}")
@@ -62,23 +60,17 @@ class TestnetGRPORunner(GRPORunner):
         if not initial_peers:
             initial_peers = self.get_initial_peers()
             logger.info(f"Retrieved initial peers from chain: {initial_peers}")
-			# If no valid peers from chain, start as bootnode
-			if not initial_peers:
-			    logger.info("No bootnodes found on chain, starting as bootnode!")
-			    initial_peers = []
-		elif initial_peers == ["BOOT"]:
+            # If no valid peers from chain, start as bootnode
+            if not initial_peers:
+                logger.info("No bootnodes found on chain, starting as bootnode!")
+                initial_peers = []
+        elif initial_peers == ["BOOT"]:
             initial_peers = []
             logger.info("Proceeding as bootnode!")
 
         grpo_args.initial_peers = initial_peers
-        # super().run(
-        #     model_args,
-        #     grpo_args,
-        #     training_args,
-        #     initial_datasets_fn,
-        #     partial(TestnetGRPOTrainer, coordinator=self.coordinator),
-        # )
-		# Add option to force bootstrap mode if initial peers are unreachable
+
+        # Add option to force bootstrap mode if initial peers are unreachable
         try:
             super().run(
                 model_args,
